@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>IPT</title>
+  <style>
+    :root {
+      --bg: #0b0f14;
+      --panel: rgba(15, 23, 42, 0.7);
+      --accent: #6ee7ff;
+      --accent-2: #a78bfa;
+      --text: #e8eef7;
+      --muted: #9fb2c8;
+      --danger: #ef4444;
+      --ok: #10b981;
+      --wave-color: #6ee7ff;
+    }
+    * { box-sizing: border-box; }
+    html, body { height: 100%; }
+    body {
+      margin: 0;
+      background: radial-gradient(1200px 800px at 50% 30%, #101827 0%, var(--bg) 60%);
+      color: var(--text);
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Inter, "Helvetica Neue", Arial, "Apple Color Emoji", "Segoe UI Emoji";
+      display: grid;
+      grid-template-rows: 1fr auto;
+      gap: 24px;
+      overflow: hidden;
+    }
+
+    .wrap { 
+      display: grid; 
+      place-items: center; 
+      padding: 24px;
+      position: relative;
+    }
+
+    #waveCanvas {
+      width: clamp(250px, 40vmin, 500px);
+      height: clamp(150px, 20vmin, 250px);
+      cursor: pointer;
+      border-radius: 20px;
+      transition: box-shadow .3s ease, transform .3s ease;
+    }
+
+    .listening #waveCanvas {
+      box-shadow: 0 0 40px rgba(110, 231, 255, 0.3);
+      transform: scale(1.02);
+    }
+
+    .speaking #waveCanvas {
+       box-shadow: 0 0 50px rgba(167, 139, 250, 0.4);
+    }
+
+    .hint { 
+      margin-top: 20px; 
+      color: var(--muted); 
+      font-size: 1rem; 
+      text-align: center; 
+      position: relative; 
+      z-index: 1; 
+    }
+
+    .panel {
+      display: none;  
+      width: min(980px, calc(100% - 24px));
+      margin: 0 auto 20px auto;
+      background: var(--panel);
+      border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 16px;
+      padding: 16px 16px 8px 16px;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.35);
+      backdrop-filter: blur(8px);
+    }
+
+    .row { display: grid; gap: 12px; grid-template-columns: 1fr; }
+    @media (min-width: 760px) {
+      .row { grid-template-columns: 1fr 1fr; }
+    }
+    
+    label { font-size: 0.9rem; color: var(--muted); }
+    select, input[type="range"], button, .monobox {
+      width: 100%;
+      background: #0e1523;
+      color: var(--text);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 12px;
+      padding: 10px 12px;
+      outline: none;
+      transition: border-color .2s;
+    }
+    select:focus, input[type="range"]:focus, button:focus-visible { border-color: var(--accent-2); }
+
+    .monobox { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; white-space: pre-wrap; min-height: 72px; }
+
+    .status { display: flex; gap: 8px; align-items: center; font-size: 0.95rem; }
+    .dot { width: 10px; height: 10px; border-radius: 50%; background: var(--muted); }
+    .dot.ok { background: var(--ok); }
+    .dot.busy { background: var(--accent-2); }
+    .dot.err { background: var(--danger); }
+
+    .btnrow { display: flex; gap: 10px; flex-wrap: wrap; justify-content: flex-end; }
+    button { cursor: pointer; border-radius: 12px; padding: 10px 14px; border: 1px solid rgba(255,255,255,0.08); }
+    .primary { background: linear-gradient(90deg, rgba(110,231,255,0.25), rgba(167,139,250,0.25)); }
+    .ghost { background: rgba(255,255,255,0.04); }
+  </style>
+</head>
+<body id="body">
+  <div class="wrap">
+    <canvas id="waveCanvas"></canvas>
+    <div class="hint" id="hint">Tap the wave to speak • Tap again to send</div>
+  </div>
+
+  <div class="panel">
+    <div class="row">
+      <div>
+        <label for="voiceSelect">Voice</label>
+        <select id="voiceSelect"></select>
+      </div>
+      <div class="row-3-col">
+        <div>
+          <label for="rate">Rate</label>
+          <input type="range" id="rate" min="0.7" max="1.4" step="0.05" value="0.95" />
+        </div>
+        <div>
+          <label for="pitch">Pitch</label>
+          <input type="range" id="pitch" min="0.7" max="1.5" step="0.05" value="1.1" />
+        </div>
+        <div>
+          <label for="volume">Volume</label>
+          <input type="range" id="volume" min="0" max="1" step="0.05" value="1" />
+        </div>
+      </div>
+    </div>
+
+    <div class="row" style="margin-top:12px;">
+      <div>
+        <label>You said</label>
+        <div id="youSaid" class="monobox"></div>
+      </div>
+      <div>
+        <label>AI replied</label>
+        <div id="aiSaid" class="monobox"></div>
+      </div>
+    </div>
+
+    <div class="row" style="margin-top:12px;">
+      <div class="status" id="status"><span class="dot" id="statusDot"></span><span id="statusText">idle</span></div>
+      <div class="btnrow">
+        <button class="ghost" id="stopTTS">Stop Voice</button>
+        <button class="ghost" id="clearLog">Clear</button>
+        <button class="primary" id="retryLast">Replay Last Reply</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ====== Canvas Wave ======
+    const canvas = document.getElementById('waveCanvas');
+    const canvasCtx = canvas.getContext('2d');
+    let audioCtx, analyser, source, animationFrameId;
+
+    function drawWave() {
+      animationFrameId = requestAnimationFrame(drawWave);
+      const bufferLength = analyser.frequencyBinCount;
+      const dataArray = new Uint8Array(bufferLength);
+      analyser.getByteTimeDomainData(dataArray);
+
+      canvasCtx.fillStyle = 'rgb(11, 15, 20)';
+      canvasCtx.fillRect(0, 0, canvas.width, canvas.height);
+      canvasCtx.lineWidth = 2;
+      canvasCtx.strokeStyle = getComputedStyle(document.documentElement).getPropertyValue('--wave-color').trim();
+      canvasCtx.beginPath();
+
+      const sliceWidth = canvas.width / bufferLength;
+      let x = 0;
+
+      for (let i = 0; i < bufferLength; i++) {
+        const y = (dataArray[i]/128.0) * canvas.height/2;
+        if (i === 0) canvasCtx.moveTo(x, y);
+        else canvasCtx.lineTo(x, y);
+        x += sliceWidth;
+      }
+      canvasCtx.lineTo(canvas.width, canvas.height / 2);
+      canvasCtx.stroke();
+    }
+
+    function stopWaveAnimation() {
+      if (animationFrameId) cancelAnimationFrame(animationFrameId);
+      canvasCtx.fillStyle = 'rgb(11, 15, 20)';
+      canvasCtx.fillRect(0, 0, canvas.width, canvas.height);
+      canvasCtx.beginPath();
+      canvasCtx.moveTo(0, canvas.height / 2);
+      canvasCtx.lineTo(canvas.width, canvas.height / 2);
+      canvasCtx.stroke();
+    }
+    stopWaveAnimation();
+
+    // ====== Utilities ======
+    const qs = (sel) => document.querySelector(sel);
+    const body = qs('#body');
+    const youSaid = qs('#youSaid');
+    const aiSaid = qs('#aiSaid');
+    const statusDot = qs('#statusDot');
+    const statusText = qs('#statusText');
+    const voiceSelect = qs('#voiceSelect');
+    const rateEl = qs('#rate');
+    const pitchEl = qs('#pitch');
+    const volumeEl = qs('#volume');
+    const hint = qs('#hint');
+
+    function setStatus(kind,text){statusDot.className='dot '+(kind||'');statusText.textContent=text||'';}
+    function setHint(text){hint.textContent=text;}
+
+    // ====== STT ======
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    const recognizer = SpeechRecognition ? new SpeechRecognition() : null;
+    let listening = false;
+
+    if (recognizer) {
+      recognizer.lang = 'en-US';
+      recognizer.interimResults = true;
+      recognizer.continuous = true;
+      let finalTranscript = '';
+
+      recognizer.onstart = () => { finalTranscript=''; setStatus('busy','listening…'); body.classList.add('listening'); setHint("I'm listening..."); };
+      recognizer.onresult = (e) => {
+        let interim=''; for(let i=e.resultIndex;i<e.results.length;i++){ const res=e.results[i]; res.isFinal ? finalTranscript+=res[0].transcript+' ' : interim+=res[0].transcript; }
+        youSaid.textContent=(finalTranscript+'\n'+(interim?('('+interim+')'):'')) .trim();
+      };
+      recognizer.onerror=(e)=>{setStatus('err','mic error: '+e.error); body.classList.remove('listening'); setHint('Mic error.'); listening=false; stopWaveAnimation();};
+      recognizer.onend=async()=>{
+        body.classList.remove('listening'); listening=false; setHint('Tap the wave to speak • Tap again to send');
+        const text = youSaid.textContent.replace(/\([^)]*\)$/,'').trim();
+        if(text) await sendToBackend(text); else setStatus('','idle');
+        if(source) source.disconnect(); if(audioCtx && audioCtx.state!=='closed') audioCtx.close().catch(console.error);
+      };
+    } else { setStatus('err','SpeechRecognition not supported'); setHint('Voice input not available.'); }
+
+    async function toggleListening() {
+  if (!recognizer) return;
+  if (!listening) {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      analyser = audioCtx.createAnalyser();
+      source = audioCtx.createMediaStreamSource(stream);
+      source.connect(analyser);
+      analyser.fftSize = 2048;
+      drawWave();
+
+      // Only cancel TTS if already speaking
+      if (synth.speaking) synth.cancel();
+
+      recognizer.start();
+      listening = true;
+    } catch (err) {
+      setStatus('err', 'Mic access denied.');
+      setHint('Allow mic access.');
+    }
+  } else recognizer.stop();
+}
+
+    canvas.addEventListener('click',toggleListening);
+
+    // ====== TTS ======
+    const synth = window.speechSynthesis;
+    let voices=[], pickedVoices=[], lastReply='';
+
+    function genderGuess(name){
+      const n=name.toLowerCase(); const fem=/(female|fiona|samantha|victoria|karen|serena|ava|allison|jenny|olivia|emily|sara|natalie|lucy|zoe|zoya|neural)/;
+      const male=/(male|daniel|matthew|michael|alex|david|james|john|brian|ryan|adam)/;
+      if(fem.test(n)) return 'f'; if(male.test(n)) return 'm'; return 'u';
+    }
+
+    function pickFiveVoices(vlist){
+      const females=vlist.filter(v=>genderGuess(v.name)==='f'&&v.lang.startsWith('en-'));
+      const males=vlist.filter(v=>genderGuess(v.name)==='m'&&v.lang.startsWith('en-'));
+      const rest=vlist.filter(v=>!['f','m'].includes(genderGuess(v.name))&&v.lang.startsWith('en-'));
+      const out=[]; out.push(...females.slice(0,3)); out.push(...males.slice(0,2));
+      while(out.length<5&&rest.length) out.push(rest.shift());
+      while(out.length<5&&vlist.length){ const next=vlist.find(v=>v.lang.startsWith('en-')); if(next) out.push(next); else break; }
+      return out.slice(0,5);
+    }
+
+    function populateVoices(){
+      voices=synth.getVoices();
+      if(!voices.length){ setStatus('err','No TTS voices'); return; }
+      pickedVoices=pickFiveVoices([...voices]); voiceSelect.innerHTML='';
+      pickedVoices.forEach((v,i)=>{ const opt=document.createElement('option'); opt.value=i.toString(); opt.textContent=`${v.name} (${v.lang})`; voiceSelect.appendChild(opt); });
+      if(!voiceSelect.children.length){ const opt=document.createElement('option'); opt.value='-1'; opt.textContent='Default system voice'; voiceSelect.appendChild(opt);}
+    }
+    populateVoices();
+    if(typeof speechSynthesis!=='undefined'&&speechSynthesis.onvoiceschanged!==undefined) speechSynthesis.onvoiceschanged=populateVoices;
+
+    function speak(text){
+      if(!text) return;
+      window.speechSynthesis.cancel();
+      const utter=new SpeechSynthesisUtterance(text);
+      const idx=parseInt(voiceSelect.value,10);
+      if(!isNaN(idx)&&pickedVoices[idx]) utter.voice=pickedVoices[idx];
+      utter.rate=parseFloat(rateEl.value); utter.pitch=parseFloat(pitchEl.value); utter.volume=parseFloat(volumeEl.value);
+      utter.onstart=()=>{setStatus('busy','speaking…'); body.classList.add('speaking');};
+      utter.onend=()=>{setStatus('','idle'); body.classList.remove('speaking');};
+      utter.onerror=(e)=>{setStatus('err','TTS error: '+e.error); body.classList.remove('speaking');};
+      synth.speak(utter);
+    }
+
+    qs('#stopTTS').addEventListener('click',()=>{synth.cancel(); setStatus('','idle'); body.classList.remove('speaking');});
+    qs('#retryLast').addEventListener('click',()=>speak(lastReply));
+
+    // ====== Backend ======
+    let currentSessionId=null;
+    async function sendToBackend(message){
+      setStatus('busy','thinking…'); setHint('One moment...');
+      try{
+        const res=await fetch('/api/cbt',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message,session_id:currentSessionId})});
+        if(!res.ok) throw new Error(`Network error: ${res.statusText}`);
+        const data=await res.json();
+        if(data.session_id&&!currentSessionId){currentSessionId=data.session_id; localStorage.setItem('cbtSessionId',currentSessionId);}
+        const aiReply=data.reply; aiSaid.textContent=aiReply; lastReply=aiReply; speak(aiReply); setStatus('ok','reply ready'); setHint('Tap the wave to speak • Tap again to send');
+      }catch(err){console.error(err); setStatus('err','Error connecting to server'); aiSaid.textContent='I had trouble connecting. Try again.'; speak(aiSaid.textContent);}
+    }
+
+    function initializeSession(){
+      const saved=localStorage.getItem('cbtSessionId'); if(saved){currentSessionId=saved; console.log('Resumed session:',saved);}
+    }
+
+    function clearUIAndSession(){
+      localStorage.removeItem('cbtSessionId'); currentSessionId=null; youSaid.textContent=''; aiSaid.textContent=''; lastReply=''; synth.cancel(); body.classList.remove('speaking','listening'); setStatus('ok','Ready for a new chat!'); setHint('Tap the wave to speak • Tap again to send');
+    }
+
+    qs('#clearLog').addEventListener('click',clearUIAndSession);
+    document.addEventListener('DOMContentLoaded',initializeSession);
+  </script>
+</body>
+</html>
