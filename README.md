@@ -72,4 +72,4 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 🙏 Acknowledgments
 - Built with Flask and Groq
-- Developed with ❤️ for mental health support
+- Developed with ❤️ for mental health support# SattvaBOT
