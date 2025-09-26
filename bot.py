@@ -237,7 +237,7 @@ def agentic_response(user_input, conversation_history):
 # -------------------- Flask Routes --------------------
 @app.route('/',methods=['GET'])
 def home():
-    print("API is working")
+    return "API is working"
 
 @app.route('/api/cbt', methods=['POST'])
 def cbt_endpoint():
