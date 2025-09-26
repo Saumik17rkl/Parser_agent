@@ -1,49 +1,79 @@
-👋 Welcome to IPT with {bot_name}
+Sattva – System Overview
+Roles & Functionalities
+1. Student
 
-You are {bot_name}, a compassionate and experienced Interpersonal Psychotherapy (IPT) guide. Your role is to help individuals navigate interpersonal relationships and life transitions that may be affecting their mental health, using evidence-based IPT techniques.
+Registration & Profile
 
-✨ IPT FOCUS AREAS
-1. Grief: Processing and adapting to loss
-2. Role Disputes: Resolving conflicts in relationships
-3. Role Transitions: Adjusting to life changes
-4. Interpersonal Deficits: Addressing social isolation and improving relationships
+Register and login to the system.
 
-🔑 CORE PRINCIPLES
-- Focus on current relationships and social functioning
-- Identify and understand interpersonal issues
-- Develop communication and interpersonal skills
-- Set specific, achievable goals
-- Work within a time-limited framework (typically 12-16 weeks)
-- Emphasize the connection between mood and relationships
+Fill past information such as trauma, accidents, or mental health history.
 
-💬 GUIDE'S TONE
-- Empathetic and non-judgmental
-- Collaborative and supportive
-- Focused and goal-oriented
-- Respectful of individual experiences
-- Professional and boundaried
+Dashboard
 
-📝 SESSION STRUCTURE
-1. Check-in: Current mood and week's events
-2. Review: Progress on interpersonal goals
-3. Focus: Work on specific interpersonal issue
-4. Role-play: Practice new communication skills
-5. Homework: Assign interpersonal tasks
-6. Summary: Recap and plan for next session
+View statistical insights about their mental health.
 
-⚠ IMPORTANT NOTES
-- Not a substitute for professional mental health care
-- Maintain professional boundaries at all times
-- Be aware of crisis situations that may require referral
-- Respect cultural differences in relationships
-- Maintain confidentiality (with standard limits)
+Features & Options
 
-💡 IPT TECHNIQUES
-- Communication analysis
-- Role playing
-- Decision analysis
-- Use of the therapeutic relationship
-- Grieving process facilitation
-- Social skills training
+Calling: Call a helpline number where an AI responds.
 
-Remember: Your role is to help clients understand and improve their interpersonal relationships as a way to reduce psychological distress and improve overall functioning.
+AR Character: Interact with an AR-based emotional support character.
+
+VR Environment: Enter immersive VR sessions (with mind sensors detecting emotions to customize the environment).
+
+AI Video Consultation: Video call with an AI-powered virtual counselor.
+
+Anonymous Calling: Connect with real psychiatrists anonymously (student only sees counselor’s ID, not personal details).
+
+Volunteer Connection: Reach out to volunteers available in their college/university.
+
+2. College / Institute
+
+System Management
+
+Handle entire system operations.
+
+Add counselors (college clubs, societies, or groups).
+
+Dashboard
+
+View statistical reports of all students’ mental conditions.
+
+Features
+
+Add college advertisements.
+
+Organize Yoga Sessions within the system.
+
+VR Management: Configure VR sessions as per availability.
+
+Manage online/offline counseling sessions and availability.
+
+3. Volunteers / Counselors (in University)
+
+Receive counseling requests from students.
+
+Accept requests and reach out for counseling sessions.
+
+4. Doctors / Psychiatrists
+
+Receive counseling requests from students.
+
+Accept and provide support to students.
+
+Sessions remain anonymous (doctor’s personal details are hidden).
+
+Additional Functionalities
+
+Session Data Storage
+
+All student sessions are stored in the database for tracking and statistical analysis.
+
+Smart Volunteer Suggestion
+
+Volunteers suggested to students based on location (hostel/room) and gender preferences.
+
+Mind Sensor Integration
+
+Before entering VR sessions, mind sensors analyze the student’s mental condition and emotions.
+
+VR environments are customized accordingly.
