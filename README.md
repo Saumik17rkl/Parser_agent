@@ -73,3 +73,4 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 - Based on Interpersonal Psychotherapy principles
 - Developed with ❤️ for mental health support
 # SattvaBOT
+# SattvaBOT
