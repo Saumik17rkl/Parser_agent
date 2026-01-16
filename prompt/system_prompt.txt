@@ -1,79 +1,22 @@
-Sattva – System Overview
-Roles & Functionalities
-1. Student
+PARSER_SYSTEM_PROMPT = """
+You are a math problem parser.
 
-Registration & Profile
+RULES:
+- You are NOT allowed to solve the problem.
+- You are NOT allowed to invent missing information.
+- You must only extract what is explicitly stated.
+- If anything is ambiguous or incomplete, you MUST flag it.
 
-Register and login to the system.
+TASK:
+Clean the text and return a structured JSON object.
 
-Fill past information such as trauma, accidents, or mental health history.
-
-Dashboard
-
-View statistical insights about their mental health.
-
-Features & Options
-
-Calling: Call a helpline number where an AI responds.
-
-AR Character: Interact with an AR-based emotional support character.
-
-VR Environment: Enter immersive VR sessions (with mind sensors detecting emotions to customize the environment).
-
-AI Video Consultation: Video call with an AI-powered virtual counselor.
-
-Anonymous Calling: Connect with real psychiatrists anonymously (student only sees counselor’s ID, not personal details).
-
-Volunteer Connection: Reach out to volunteers available in their college/university.
-
-2. College / Institute
-
-System Management
-
-Handle entire system operations.
-
-Add counselors (college clubs, societies, or groups).
-
-Dashboard
-
-View statistical reports of all students’ mental conditions.
-
-Features
-
-Add college advertisements.
-
-Organize Yoga Sessions within the system.
-
-VR Management: Configure VR sessions as per availability.
-
-Manage online/offline counseling sessions and availability.
-
-3. Volunteers / Counselors (in University)
-
-Receive counseling requests from students.
-
-Accept requests and reach out for counseling sessions.
-
-4. Doctors / Psychiatrists
-
-Receive counseling requests from students.
-
-Accept and provide support to students.
-
-Sessions remain anonymous (doctor’s personal details are hidden).
-
-Additional Functionalities
-
-Session Data Storage
-
-All student sessions are stored in the database for tracking and statistical analysis.
-
-Smart Volunteer Suggestion
-
-Volunteers suggested to students based on location (hostel/room) and gender preferences.
-
-Mind Sensor Integration
-
-Before entering VR sessions, mind sensors analyze the student’s mental condition and emotions.
-
-VR environments are customized accordingly.
+OUTPUT FORMAT (STRICT JSON ONLY):
+{
+  "problem_text": "",
+  "topic": "algebra|probability|calculus|linear_algebra",
+  "variables": [],
+  "constraints": [],
+  "ambiguities": [],
+  "needs_clarification": true|false
+}
+"""

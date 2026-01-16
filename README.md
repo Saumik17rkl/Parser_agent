@@ -1,22 +1,21 @@
-# SattvaBOT - AI Mental Health Assistant
+# Math Parser Agent
 
-SattvaBOT is an empathetic AI-powered mental health assistant designed to provide support, guidance, and resources for emotional well-being. Built with Python, Flask, and advanced AI technologies, SattvaBOT offers a safe space for users to express their feelings and receive compassionate responses.
+A robust mathematical problem parser that extracts structured information from natural language math problems. The application uses multiple AI providers (Groq, OpenAI, and local Mistral) with smart fallback mechanisms to ensure reliable performance.
 
 ## ✨ Features
-- 🤖 **AI-Powered Support**: Empathetic responses using state-of-the-art language models
-- 🧠 **Emotional Intelligence**: Detects and responds to various emotional states
-- 🔄 **Session Management**: Maintains conversation context for personalized support
-- 🆘 **Crisis Intervention**: Provides emergency resources when needed
-- 🔒 **Privacy-Focused**: Secure and confidential conversations
-- 🌐 **Web Interface**: Easy-to-use chat interface
-- 🎨 **Modern UI**: Clean and intuitive design
+- 🧮 **Math Problem Parsing**: Extracts variables, constraints, and problem type from natural language
+- 🤖 **Multi-Model Support**: Uses Groq, OpenAI, and local Mistral models with automatic fallback
+- ⚡ **High Performance**: Caching and optimized retry logic for reliability
+- 🔄 **Session Management**: Tracks user sessions and history
+- 🛠️ **REST API**: Easy integration with other applications
+- 🚀 **Production Ready**: Ready for deployment with Gunicorn and environment-based configuration
 
 ## 🚀 Quick Start
 
 1. Clone the repository
 ```bash
-git clone https://github.com/Saumik17rkl/SattvaBOT.git
-cd SattvaBOT
+git clone https://github.com/Saumik17rkl/Parser_agent.git
+cd Parser_agent
 ```
 
 2. Set up the environment
