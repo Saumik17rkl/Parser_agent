@@ -252,28 +252,6 @@ def initialize_openai_client():
         logger.warning(f"Failed to initialize OpenAI client: {str(e)}")
         return None
 
-def initialize_mistral_model():
-    """Initialize Mistral model with error handling"""
-    try:
-        logger.info(f"Loading Mistral model: {MISTRAL_MODEL}")
-        model = AutoModelForCausalLM.from_pretrained(
-            MISTRAL_MODEL,
-            device_map="auto",
-            trust_remote_code=True
-        )
-        tokenizer = AutoTokenizer.from_pretrained(MISTRAL_MODEL, trust_remote_code=True)
-        pipe = pipeline(
-            "text-generation",
-            model=model,
-            tokenizer=tokenizer,
-            device_map="auto"
-        )
-        logger.info("Mistral model loaded successfully")
-        return pipe
-    except Exception as e:
-        logger.warning(f"Failed to load Mistral model: {str(e)}")
-        return None
-
 groq_client = initialize_groq_client()
 openai_client = initialize_openai_client()
 
@@ -455,39 +433,6 @@ def call_openai_api(prompt_text):
             raise RateLimitError("OpenAI API rate limit exceeded") from e
         raise
 
-def call_mistral_api(prompt_text):
-    """Call local Mistral model using Transformers pipeline"""
-    if not mistral_pipe:
-        return None
-        
-    try:
-        
-        
-        # Format messages according to Mistral's expected format
-        formatted_prompt = f"""<s>[INST] <<SYS>>
-                        {PARSER_SYSTEM_PROMPT}
-                        <</SYS>>
-
-                        {prompt_text} [/INST]"""
-
-        
-        # Generate response
-        response = mistral_pipe(
-            formatted_prompt,
-            max_length=1000,
-            do_sample=True,
-            temperature=0.3,
-            top_p=0.9,
-            return_full_text=False
-        )
-        
-        if response and len(response) > 0:
-            return response[0].get('generated_text', '')
-        return None
-    except Exception as e:
-        logger.warning(f"Mistral API error: {str(e)}")
-        return None
-
 def parse_json_response(response_text):
     """Extract and parse JSON from response"""
     try:
@@ -594,14 +539,6 @@ Respond ONLY with valid JSON matching the required structure."""
             except Exception as e:
                 logger.warning(f"OpenAI error: {str(e)}")
         
-        # Try Mistral as fallback
-        if not ai_response and mistral_pipe:
-            logger.info("Attempting Mistral fallback")
-            ai_response = call_mistral_api(prompt)
-            if ai_response:
-                model_used = 'mistral'
-                logger.info("Successfully used Mistral model")
-        
         # If all APIs failed, use fallback heuristic
         if not ai_response:
             logger.warning("All AI APIs unavailable, using fallback heuristic")
@@ -672,7 +609,6 @@ def home():
     api_status = {
         'groq': 'available' if groq_client else 'unavailable',
         'openai': 'available' if openai_client else 'unavailable',
-        'mistral': 'available' if mistral_pipe else 'unavailable',
         'fallback': 'available'
     }
     

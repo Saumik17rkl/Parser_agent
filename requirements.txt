@@ -1,16 +1,20 @@
 # Core dependencies
 flask==3.0.0
 python-dotenv==1.0.0
-flask-cors==3.0.10
+flask-cors==4.0.0
 requests>=2.31.0
 python-dateutil>=2.8.2
+tenacity>=8.2.3
 
 # Database
 pymongo>=4.5.0
+pymilvus>=2.3.0
 
 # AI/ML
 groq
 openai>=1.0.0
+langchain>=0.1.0
+sentence-transformers>=2.2.2
 
 # Production server
 gunicorn>=21.2.0
@@ -19,7 +23,12 @@ gunicorn>=21.2.0
 transformers>=4.36.0
 torch>=2.0.0
 
-# Development (not needed in production)
+# RAG specific
+chromadb>=0.4.0
+unstructured>=0.10.0
+pypdf>=3.15.0
+python-multipart>=0.0.6
+
+# Development (optional, not needed in production)
 # pytest>=7.4.0
 # pytest-cov>=4.1.0
-# python-dotenv>=0.19.0
